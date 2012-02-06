@@ -183,7 +183,7 @@ class GalleryCustomLink {
 	  return $output;
 	}
 
-	private function rt_image_attachment_fields_to_edit($form_fields, $post){
+	public function rt_image_attachment_fields_to_edit($form_fields, $post){
 		$form_fields["rt-image-link"] = array(
 	    "label" => __("Custom Link"),
 	    "input" => "text", // default
@@ -193,7 +193,7 @@ class GalleryCustomLink {
 	  return $form_fields;
 	}
 
-	private function rt_image_attachment_fields_to_save($post, $attachment) {
+	public function rt_image_attachment_fields_to_save($post, $attachment) {
 	  if( isset($attachment['rt-image-link']) ){
 	    update_post_meta($post['ID'], '_rt-image-link', $attachment['rt-image-link']);
 	  }
