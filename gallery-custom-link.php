@@ -3,8 +3,9 @@
 Plugin Name: Gallery Custom Link
 Plugin URI: http://nick-brewer.com
 Description: Add an extra field to your image for a custom link to be used with the gallery
-Version: 0.1
+Version: 0.2
 Author: Nick Brewer
+Contributors: Marco Schmoecker
 Author URI: http://nick-brewer.com
 License: GPL2
 
@@ -145,9 +146,7 @@ class GalleryCustomLink {
       if( 'custom' == $attr['link']){
           $image = wp_get_attachment_image($id, $size, false);
           $attachment_meta = get_post_meta($id, '_rt-image-link', true);
-          if($attachment_meta){
-    	      $link = "<a href='$attachment_meta'>$image</a>";
-	      }
+    	  $link = ($attachment_meta)? "<a href='$attachment_meta'>$image</a>" : $image;
 	  } else {
           $link = isset($attr['link']) && 'file' == $attr['link'] ? wp_get_attachment_link($id, $size, false, false) : wp_get_attachment_link($id, $size, true, false);
       }
