@@ -29,8 +29,7 @@ class GalleryCustomLink {
 	{
 		add_filter("attachment_fields_to_edit", array($this, 'rt_image_attachment_fields_to_edit'), null, 2);
 		add_filter("attachment_fields_to_save", array($this, 'rt_image_attachment_fields_to_save'), null , 2);
-		add_shortcode('gallery', array($this, 'shortcode'));
-		//add_shortcode('GalleryCustomLink', array($this, 'shortcode'));
+		add_filter('post_gallery', array($this, 'shortcode'), 10, 2);
 	}
 
 	/**
@@ -44,7 +43,7 @@ class GalleryCustomLink {
 	* @param array $attr Attributes attributed to the shortcode.
 	* @return string HTML content to display gallery.
 	*/
-	public function shortcode($attr)
+	public function shortcode($output, $attr)
 	{
 		/* -------------------------------
 		MODIFIED CORE FUNCTION
@@ -54,11 +53,6 @@ class GalleryCustomLink {
 
 	  static $instance = 0;
 	  $instance++;
-
-	  // Allow plugins/themes to override the default gallery template.
-	  $output = apply_filters('post_gallery', '', $attr);
-	  if ( $output != '' )
-	    return $output;
 
 	  // We're trusting author input, so let's at least make sure it looks like a valid orderby statement
 	  if ( isset( $attr['orderby'] ) ) {
@@ -144,38 +138,35 @@ class GalleryCustomLink {
 
 	  $i = 0;
 	  foreach ( $attachments as $id => $attachment ) {
-	    $link = isset($attr['link']) && 'file' == $attr['link'] ? wp_get_attachment_link($id, $size, false, false) : wp_get_attachment_link($id, $size, true, false);
 
 	  /* -------------------------------
 	  CORE MODIFICATION ################
 	  ------------------------------- */
-	  $image = wp_get_attachment_image($id, $size, false);
-	  $attachment_meta = get_post_meta($id, '_rt-image-link', true);
-	  if($attachment_meta){
-	    if($attr['link'] == 'custom_url'){
-	      $link = $attachment_meta;
-	    }
-	  }
-
-	  $output .= "<{$itemtag} class='gallery-item'>";
-	  $output .= "<{$icontag} class='gallery-icon'>";
-
-	  /* -------------------------------
-	  CORE MODIFICATION ################
-	  ------------------------------- */
-	  if($attachment_meta){
-	    $output .= "<a href='$link'>$image</a>";
+      if( 'custom' == $attr['link']){
+          $image = wp_get_attachment_image($id, $size, false);
+          $attachment_meta = get_post_meta($id, '_rt-image-link', true);
+          if($attachment_meta){
+    	      $link = "<a href='$attachment_meta'>$image</a>";
+	      }
 	  } else {
-	    $output .= $link;
-	  }
-	 
-	  $output .= "</{$icontag}>";
-	  if ( $captiontag && trim($attachment->post_excerpt) ) {
-	    $output .= "<{$captiontag} class='gallery-caption'>" . wptexturize($attachment->post_excerpt) . "</{$captiontag}>";
-	  }
-	  $output .= "</{$itemtag}>";
-	  if ( $columns > 0 && ++$i % $columns == 0 )
-	    $output .= '<br style="clear: both;" />';
+          $link = isset($attr['link']) && 'file' == $attr['link'] ? wp_get_attachment_link($id, $size, false, false) : wp_get_attachment_link($id, $size, true, false);
+      }
+
+          $output .= "<{$itemtag} class='gallery-item'>";
+        		$output .= "
+        			<{$icontag} class='gallery-icon'>
+        				$link
+        			</{$icontag}>";
+        		if ( $captiontag && trim($attachment->post_excerpt) ) {
+        			$output .= "
+        				<{$captiontag} class='wp-caption-text gallery-caption'>
+        				" . wptexturize($attachment->post_excerpt) . "
+        				</{$captiontag}>";
+        		}
+        		$output .= "</{$itemtag}>";
+        		if ( $columns > 0 && ++$i % $columns == 0 )
+        			$output .= '<br style="clear: both" />';
+
 	  }
 	 
 	  $output .= "<br style='clear: both;' /></div>\n";
